@@ -1,6 +1,7 @@
 use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future};
 
-use bevy::{prelude::{App, Plugin, Resource, CoreStage, World}};
+use bevy_app::{CoreStage, Plugin, App};
+use bevy_ecs::{system::Resource, prelude::World};
 use tokio::{runtime::Runtime, task::{JoinHandle}};
 
 
