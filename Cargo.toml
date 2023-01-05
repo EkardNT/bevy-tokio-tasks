@@ -7,6 +7,8 @@ license = "CC0-1.0"
 description = " Simple integration of a Tokio runtime into a Bevy app for background processing."
 homepage = "https://crates.io/crates/bevy-tokio-tasks"
 repository = "https://github.com/EkardNT/bevy-tokio-tasks"
+keywords = ["gamedev", "bevy", "tokio", "async", "plugin"]
+categories = ["game-development", "asynchronous"]
 
 [dependencies]
 bevy = "0.9.1"
