@@ -1,0 +1,13 @@
+[package]
+name = "bevy-tokio-tasks"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.9.1"
+tokio = { version = "1.23.0", features = ["rt-multi-thread", "sync"] }
+
+[dev-dependencies]
+tokio = { version = "1.23.0", features = ["time"] }
