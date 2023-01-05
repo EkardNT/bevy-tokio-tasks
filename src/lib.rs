@@ -19,19 +19,20 @@ impl UpdateTicks {
 }
 
 pub struct TokioTasksPlugin {
-    make_runtime: Box<dyn Fn() -> Runtime + Send + Sync + 'static>,
-    tick_stage: CoreStage,
+    /// Callback which is used to create a Tokio runtime when the plugin is installed.
+    pub make_runtime: Box<dyn Fn() -> Runtime + Send + Sync + 'static>,
+    /// The stage to which the `tick_runtime_update` system will be added.
+    pub tick_stage: CoreStage,
 }
 
 impl Default for TokioTasksPlugin {
     fn default() -> Self {
-        let make_runtime = Box::new(|| {
-            let mut runtime = tokio::runtime::Builder::new_multi_thread();
-            runtime.enable_all();
-            runtime.build().expect("Failed to create Tokio runtime for background tasks")
-        });
         Self {
-            make_runtime,
+            make_runtime: Box::new(|| {
+                let mut runtime = tokio::runtime::Builder::new_multi_thread();
+                runtime.enable_all();
+                runtime.build().expect("Failed to create Tokio runtime for background tasks")
+            }),
             tick_stage: CoreStage::Update,
         }
     }

@@ -193,7 +193,7 @@ dependencies = [
 
 [[package]]
 name = "bevy-tokio-tasks"
-version = "0.1.0"
+version = "0.9.0"
 dependencies = [
  "bevy",
  "tokio",
