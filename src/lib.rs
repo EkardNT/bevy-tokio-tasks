@@ -4,7 +4,7 @@ use bevy_app::{CoreStage, Plugin, App};
 use bevy_ecs::{system::Resource, prelude::World};
 use tokio::{runtime::Runtime, task::{JoinHandle}};
 
-
+/// An internal struct keeping track of how many ticks have elapsed since the start of the program.
 #[derive(Resource)]
 struct UpdateTicks {
     ticks: Arc<AtomicUsize>,
@@ -19,14 +19,21 @@ impl UpdateTicks {
     }
 }
 
+/// The Bevy [`Plugin`] which sets up the [`TokioTasksRuntime`] Bevy resource and registers
+/// the [`tick_runtime_update`] exclusive system.
 pub struct TokioTasksPlugin {
-    /// Callback which is used to create a Tokio runtime when the plugin is installed.
+    /// Callback which is used to create a Tokio runtime when the plugin is installed. The
+    /// default value for this field configures a multi-threaded [`Runtime`] with IO and timer
+    /// functionality enabled.
     pub make_runtime: Box<dyn Fn() -> Runtime + Send + Sync + 'static>,
-    /// The stage to which the `tick_runtime_update` system will be added.
+    /// The stage to which the [`tick_runtime_update`] system will be added. The default
+    /// value for this field is [`CoreStage::Update`].
     pub tick_stage: CoreStage,
 }
 
 impl Default for TokioTasksPlugin {
+    /// Configures the plugin to build a new multi-threaded Tokio [`Runtime`] with both
+    /// IO and timer functionality enabled.
     fn default() -> Self {
         Self {
             make_runtime: Box::new(|| {
@@ -57,6 +64,10 @@ impl Plugin for TokioTasksPlugin {
     }
 }
 
+/// The Bevy exclusive system which executes the main thread callbacks that background
+/// tasks requested using [`run_on_main_thread`](TaskContext::run_on_main_thread). You
+/// can control which [`CoreStage`] this system executes in by specifying a custom
+/// [`tick_stage`](TokioTasksPlugin::tick_stage) value.
 pub fn tick_runtime_update(world: &mut World) {
     let current_tick = {
         let tick_counter = match world.get_resource::<UpdateTicks>() {
@@ -76,8 +87,12 @@ pub fn tick_runtime_update(world: &mut World) {
 
 type MainThreadCallback = Box<dyn FnOnce(MainThreadContext) + Send + 'static>;
 
+/// The Bevy [`Resource`] which stores the Tokio [`Runtime`] and allows for spawning new
+/// background tasks.
 #[derive(Resource)]
 pub struct TokioTasksRuntime {
+    /// The Tokio [`Runtime`] on which background tasks are executed. You can specify
+    /// how this is created by providing a custom [`make_runtime`](TokioTasksPlugin::make_runtime).
     pub runtime: Runtime,
     ticks: Arc<AtomicUsize>,
     update_watch_rx: tokio::sync::watch::Receiver<()>,
@@ -86,7 +101,7 @@ pub struct TokioTasksRuntime {
 }
 
 impl TokioTasksRuntime {
-    pub fn new(
+    fn new(
             ticks: Arc<AtomicUsize>,
             runtime: Runtime,
             update_watch_rx: tokio::sync::watch::Receiver<()>) -> Self {
@@ -101,6 +116,10 @@ impl TokioTasksRuntime {
         }
     }
 
+    /// Spawn a task which will run on the background Tokio [`Runtime`] managed by this [`TokioTasksRuntime`]. The
+    /// background task is provided a [`TaskContext`] which allows it to do things like
+    /// [sleep for a given number of main thread updates](TaskContext::sleep_updates) or 
+    /// [invoke callbacks on the main Bevy thread](TaskContext::run_on_main_thread).
     pub fn spawn_background_task<Task, Output, Spawnable>(&self, spawnable_task: Spawnable) -> JoinHandle<Output>
     where 
         Task: Future<Output = Output> + Send + 'static,
@@ -128,12 +147,17 @@ impl TokioTasksRuntime {
     }
 }
 
+/// The context arguments which are available to main thread callbacks requested using
+/// [`run_on_main_thread`](TaskContext::run_on_main_thread).
 pub struct MainThreadContext<'a> {
+    /// A mutable reference to the main Bevy [World].
     pub world: &'a mut World,
+    /// The current update tick in which the current main thread callback is executing.
     pub current_tick: usize,
 }
 
-
+/// The context arguments which are available to background tasks spawned onto the
+/// [`TokioTasksRuntime`].
 pub struct TaskContext {
     update_watch_rx: tokio::sync::watch::Receiver<()>,
     update_run_tx: tokio::sync::mpsc::UnboundedSender<MainThreadCallback>,
@@ -141,10 +165,16 @@ pub struct TaskContext {
 }
 
 impl TaskContext {
+    /// Returns the current value of the ticket count from the main thread - how many updates
+    /// have occurred since the start of the program. Because the tick count is updated from the
+    /// main thread, the tick count may change any time after this function call returns.
     pub fn current_tick(&self) -> usize {
         self.ticks.load(Ordering::SeqCst)
     }
 
+    /// Sleeps the background task until a given number of main thread updates have occurred. If
+    /// you instead want to sleep for a given length of wall-clock time, call the normal Tokio sleep
+    /// function.
     pub async fn sleep_updates(&mut self, updates_to_sleep: usize) {
         let target_tick = self.ticks.load(Ordering::SeqCst).wrapping_add(updates_to_sleep);
         while self.ticks.load(Ordering::SeqCst) < target_tick {
@@ -154,12 +184,15 @@ impl TaskContext {
         }
     }
 
+    /// Invokes a synchronous callback on the main Bevy thread. The callback will have mutable access to the
+    /// main Bevy [`World`], allowing it to update any resources or entities that it wants. The callback can
+    /// report results back to the background thread by returning an output value, which will then be returned from
+    /// this async function once the callback runs.
     pub async fn run_on_main_thread<Runnable, Output>(&mut self, runnable: Runnable) -> Output
     where
         Runnable: FnOnce(MainThreadContext) -> Output + Send + 'static,
         Output: Send + 'static
     {
-        
         let (output_tx, output_rx) = tokio::sync::oneshot::channel();
         if self.update_run_tx.send(Box::new(move |ctx| {
             if output_tx.send(runnable(ctx)).is_err() {
