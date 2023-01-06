@@ -68,7 +68,9 @@ fn example_system(runtime: ResMut<TokioTasksRuntime>) {
 - [change_clear_color](examples/change_clear_color.rs) - This example spawns a background task which
 runs forever. Every second, the background task updates the app's background clear color. This demonstrates
 how background tasks can synchronize with the main thread to update game state.
-- [shutdown_after_slee](examples/shutdown_after_sleep.rs) - This example spawns a background task which
+- [async_fn](examples/async_fn.rs) - Does the same thing as the change_clear_color example,
+except that it shows how you can pass an `async fn` to `spawn_background_task`.
+- [shutdown_after_sleep](examples/shutdown_after_sleep.rs) - This example spawns a background task which
 sleeps for 120 Bevy game updates, then shuts down the Bevy app.
 
 ## Version Compatibility
