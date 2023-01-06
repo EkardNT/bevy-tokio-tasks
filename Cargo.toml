@@ -1,10 +1,10 @@
 [package]
 name = "bevy-tokio-tasks"
 # Major and minor version here should match bevy's. Patch version can vary.
-version = "0.9.0"
+version = "0.9.1"
 edition = "2021"
 license = "CC0-1.0"
-description = " Simple integration of a Tokio runtime into a Bevy app for background processing."
+description = "Simple integration of a Tokio runtime into a Bevy app for background processing."
 homepage = "https://crates.io/crates/bevy-tokio-tasks"
 repository = "https://github.com/EkardNT/bevy-tokio-tasks"
 keywords = ["gamedev", "bevy", "tokio", "async", "plugin"]
