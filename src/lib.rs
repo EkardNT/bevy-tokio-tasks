@@ -158,6 +158,7 @@ pub struct MainThreadContext<'a> {
 
 /// The context arguments which are available to background tasks spawned onto the
 /// [`TokioTasksRuntime`].
+#[derive(Clone)]
 pub struct TaskContext {
     update_watch_rx: tokio::sync::watch::Receiver<()>,
     update_run_tx: tokio::sync::mpsc::UnboundedSender<MainThreadCallback>,
