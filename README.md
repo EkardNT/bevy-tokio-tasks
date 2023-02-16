@@ -2,6 +2,8 @@
 
 A simple Bevy plugin which integrates a Tokio runtime into a Bevy app.
 
+[![crates.io](https://img.shields.io/crates/v/bevy-tokio-tasks)](https://crates.io/crates/bevy-tokio-tasks)
+
 ## How To
 
 ### How to initialize this plugin
