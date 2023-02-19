@@ -1,4 +1,4 @@
-use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future, ops::{Deref, DerefMut}};
+use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future};
 
 use bevy_app::{CoreStage, Plugin, App};
 use bevy_ecs::{system::Resource, prelude::World};
@@ -74,7 +74,7 @@ pub fn tick_runtime_update(world: &mut World) {
             Some(counter) => counter,
             None => return
         };
-        
+
         // Increment update ticks and notify watchers of update tick.
         tick_counter.increment_ticks()
     };
@@ -90,26 +90,12 @@ type MainThreadCallback = Box<dyn FnOnce(MainThreadContext) + Send + 'static>;
 /// The Bevy [`Resource`] which stores the Tokio [`Runtime`] and allows for spawning new
 /// background tasks.
 #[derive(Resource)]
-pub struct TokioTasksRuntime(pub Box<TokioTasksRuntimeInner>);
+pub struct TokioTasksRuntime(Box<TokioTasksRuntimeInner>);
 
-impl Deref for TokioTasksRuntime {
-    type Target = TokioTasksRuntimeInner;
-
-    fn deref(&self) -> &Self::Target {
-        return &self.0;
-    }
-}
-
-impl DerefMut for TokioTasksRuntime {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        return &mut self.0;
-    }
-}
-
-pub struct TokioTasksRuntimeInner {
-    /// The Tokio [`Runtime`] on which background tasks are executed. You can specify
-    /// how this is created by providing a custom [`make_runtime`](TokioTasksPlugin::make_runtime).
-    pub runtime: Runtime,
+/// The inner fields are boxed to reduce the cost of the every-frame move out of and back into
+/// the world in [`tick_runtime_update`].
+struct TokioTasksRuntimeInner {
+    runtime: Runtime,
     ticks: Arc<AtomicUsize>,
     update_watch_rx: tokio::sync::watch::Receiver<()>,
     update_run_tx: tokio::sync::mpsc::UnboundedSender<MainThreadCallback>,
@@ -132,6 +118,12 @@ impl TokioTasksRuntime {
         }))
     }
 
+    /// Returns the Tokio [`Runtime`] on which background tasks are executed. You can specify
+    /// how this is created by providing a custom [`make_runtime`](TokioTasksPlugin::make_runtime).
+    pub fn runtime(&self) -> &Runtime {
+        &self.0.runtime
+    }
+
     /// Spawn a task which will run on the background Tokio [`Runtime`] managed by this [`TokioTasksRuntime`]. The
     /// background task is provided a [`TaskContext`] which allows it to do things like
     /// [sleep for a given number of main thread updates](TaskContext::sleep_updates) or 
@@ -142,18 +134,19 @@ impl TokioTasksRuntime {
         Output: Send + 'static,
         Spawnable: FnOnce(TaskContext) -> Task + Send + 'static,
     {
+        let inner = &self.0;
         let context = TaskContext {
-            update_watch_rx: self.update_watch_rx.clone(),
-            ticks: self.ticks.clone(),
-            update_run_tx: self.update_run_tx.clone(),
+            update_watch_rx: inner.update_watch_rx.clone(),
+            ticks: inner.ticks.clone(),
+            update_run_tx: inner.update_run_tx.clone(),
         };
         let future = spawnable_task(context);
-        self.runtime.spawn(future)
+        inner.runtime.spawn(future)
     }
 
     /// Execute all of the requested runnables on the main thread.
     pub(crate) fn execute_main_thread_work(&mut self, world: &mut World, current_tick: usize) {
-        while let Ok(runnable) = self.update_run_rx.try_recv() {
+        while let Ok(runnable) = self.0.update_run_rx.try_recv() {
             let context = MainThreadContext {
                 world,
                 current_tick
