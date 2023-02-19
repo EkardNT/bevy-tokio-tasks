@@ -1,4 +1,4 @@
-use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future};
+use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future, ops::{Deref, DerefMut}};
 
 use bevy_app::{CoreStage, Plugin, App};
 use bevy_ecs::{system::Resource, prelude::World};
@@ -90,7 +90,23 @@ type MainThreadCallback = Box<dyn FnOnce(MainThreadContext) + Send + 'static>;
 /// The Bevy [`Resource`] which stores the Tokio [`Runtime`] and allows for spawning new
 /// background tasks.
 #[derive(Resource)]
-pub struct TokioTasksRuntime {
+pub struct TokioTasksRuntime(pub Box<TokioTasksRuntimeInner>);
+
+impl Deref for TokioTasksRuntime {
+    type Target = TokioTasksRuntimeInner;
+
+    fn deref(&self) -> &Self::Target {
+        return &self.0;
+    }
+}
+
+impl DerefMut for TokioTasksRuntime {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        return &mut self.0;
+    }
+}
+
+pub struct TokioTasksRuntimeInner {
     /// The Tokio [`Runtime`] on which background tasks are executed. You can specify
     /// how this is created by providing a custom [`make_runtime`](TokioTasksPlugin::make_runtime).
     pub runtime: Runtime,
@@ -107,13 +123,13 @@ impl TokioTasksRuntime {
             update_watch_rx: tokio::sync::watch::Receiver<()>) -> Self {
         let (update_run_tx, update_run_rx) = tokio::sync::mpsc::unbounded_channel();
 
-        Self {
+        Self(Box::new(TokioTasksRuntimeInner {
             runtime,
             ticks,
             update_watch_rx,
             update_run_tx,
             update_run_rx,
-        }
+        }))
     }
 
     /// Spawn a task which will run on the background Tokio [`Runtime`] managed by this [`TokioTasksRuntime`]. The
