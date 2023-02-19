@@ -82,6 +82,7 @@ between Bevy updates, the patch version is allowed to increment independent of B
 
 | bevy-tokio-tasks version | bevy version | tokio version |
 |---|---|---|
+| 0.9.5 | 0.9.1 | 1 |
 | 0.9.4 | 0.9.1 | 1 |
 | 0.9.3 | 0.9.1 | 1 |
 | 0.9.2 | 0.9.1 | 1 |
