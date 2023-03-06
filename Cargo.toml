@@ -16,5 +16,5 @@ bevy_ecs = "0.9.1"
 tokio = { version = "1", features = ["rt-multi-thread", "sync"] }
 
 [dev-dependencies]
-bevy = { version = "0.9.1", default-features = false, features = ["bevy_core_pipeline", "bevy_asset", "bevy_render", "bevy_winit", "x11"] }
+bevy = { version = "0.10.0", default-features = false, features = ["bevy_core_pipeline", "bevy_asset", "bevy_render", "bevy_winit", "x11"] }
 tokio = { version = "1", features = ["time"] }
