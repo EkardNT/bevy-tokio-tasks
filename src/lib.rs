@@ -1,6 +1,6 @@
 use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future};
 
-use bevy_app::{CoreStage, Plugin, App};
+use bevy_app::{Plugin, App};
 use bevy_ecs::{system::Resource, prelude::World};
 use tokio::{runtime::Runtime, task::{JoinHandle}};
 
@@ -26,9 +26,6 @@ pub struct TokioTasksPlugin {
     /// default value for this field configures a multi-threaded [`Runtime`] with IO and timer
     /// functionality enabled.
     pub make_runtime: Box<dyn Fn() -> Runtime + Send + Sync + 'static>,
-    /// The stage to which the [`tick_runtime_update`] system will be added. The default
-    /// value for this field is [`CoreStage::Update`].
-    pub tick_stage: CoreStage,
 }
 
 impl Default for TokioTasksPlugin {
@@ -41,7 +38,6 @@ impl Default for TokioTasksPlugin {
                 runtime.enable_all();
                 runtime.build().expect("Failed to create Tokio runtime for background tasks")
             }),
-            tick_stage: CoreStage::Update,
         }
     }
 }
@@ -60,7 +56,8 @@ impl Plugin for TokioTasksPlugin {
             runtime,
             update_watch_rx,
         ));
-        app.add_system_to_stage(self.tick_stage.clone(), tick_runtime_update);
+        app.add_system(tick_runtime_update);
+        // app.add_system_to_stage(self.tick_stage.clone(), tick_runtime_update);
     }
 }
 
