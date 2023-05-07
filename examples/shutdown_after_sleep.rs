@@ -1,4 +1,8 @@
-use bevy::{app::AppExit, prelude::{App, ResMut}, DefaultPlugins};
+use bevy::{
+    app::AppExit,
+    prelude::{App, ResMut},
+    DefaultPlugins,
+};
 use bevy_tokio_tasks::{TokioTasksPlugin, TokioTasksRuntime};
 
 fn main() {
@@ -16,8 +20,12 @@ fn demo(runtime: ResMut<TokioTasksRuntime>) {
         ctx.sleep_updates(120).await;
         println!("Task finished initial wait on tick {}", ctx.current_tick());
         ctx.run_on_main_thread(move |ctx| {
-            println!("Task going to request app exit on tick {}", ctx.current_tick);
+            println!(
+                "Task going to request app exit on tick {}",
+                ctx.current_tick
+            );
             ctx.world.send_event(AppExit {});
-        }).await;
+        })
+        .await;
     });
 }
