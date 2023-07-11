@@ -1,12 +1,12 @@
-use bevy::{app::AppExit, prelude::{App, ResMut}, DefaultPlugins};
+use bevy::{app::AppExit, prelude::{App, ResMut, Update}, DefaultPlugins};
 use bevy_tokio_tasks::{TokioTasksPlugin, TokioTasksRuntime};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(TokioTasksPlugin::default())
-        .add_system(bevy::window::close_on_esc)
-        .add_startup_system(demo)
+        .add_plugins(TokioTasksPlugin::default())
+        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Update, demo)
         .run();
 }
 

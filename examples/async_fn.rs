@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::{prelude::{App, ResMut, ClearColor, Color, Commands, Camera2dBundle}, DefaultPlugins};
+use bevy::{prelude::{App, ResMut, ClearColor, Color, Commands, Camera2dBundle, Update}, DefaultPlugins};
 use bevy_tokio_tasks::{TokioTasksPlugin, TokioTasksRuntime, TaskContext};
 
 static COLORS: [Color; 5] = [
@@ -14,9 +14,9 @@ static COLORS: [Color; 5] = [
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(TokioTasksPlugin::default())
-        .add_system(bevy::window::close_on_esc)
-        .add_startup_system(demo)
+        .add_plugins(TokioTasksPlugin::default())
+        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Update, demo)
         .run();
 }
 

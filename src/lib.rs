@@ -1,6 +1,6 @@
 use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future};
 
-use bevy_app::{Plugin, App};
+use bevy_app::{Plugin, App, Update};
 use bevy_ecs::{system::Resource, prelude::World};
 use tokio::{runtime::Runtime, task::{JoinHandle}};
 
@@ -56,7 +56,7 @@ impl Plugin for TokioTasksPlugin {
             runtime,
             update_watch_rx,
         ));
-        app.add_system(tick_runtime_update);
+        app.add_systems(Update, tick_runtime_update);
         // app.add_system_to_stage(self.tick_stage.clone(), tick_runtime_update);
     }
 }
