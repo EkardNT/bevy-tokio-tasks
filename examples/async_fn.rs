@@ -1,7 +1,10 @@
 use std::time::Duration;
 
-use bevy::{prelude::{App, ResMut, ClearColor, Color, Commands, Camera2dBundle}, DefaultPlugins};
-use bevy_tokio_tasks::{TokioTasksPlugin, TokioTasksRuntime, TaskContext};
+use bevy::prelude::{
+    App, Camera2dBundle, ClearColor, Color, Commands, DefaultPlugins, ResMut, Update,
+};
+
+use bevy_tokio_tasks::{TaskContext, TokioTasksPlugin, TokioTasksRuntime};
 
 static COLORS: [Color; 5] = [
     Color::RED,
@@ -14,9 +17,9 @@ static COLORS: [Color; 5] = [
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(TokioTasksPlugin::default())
-        .add_system(bevy::window::close_on_esc)
-        .add_startup_system(demo)
+        .add_plugins(TokioTasksPlugin::default())
+        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Update, demo)
         .run();
 }
 
@@ -33,7 +36,8 @@ async fn update_colors(mut ctx: TaskContext) {
                 clear_color.0 = COLORS[color_index];
                 println!("Changed clear color to {:?}", clear_color.0);
             }
-        }).await;
+        })
+        .await;
         color_index = (color_index + 1) % COLORS.len();
         tokio::time::sleep(Duration::from_secs(1)).await;
     }

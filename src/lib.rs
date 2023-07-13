@@ -1,8 +1,11 @@
-use std::{sync::{Arc, atomic::{Ordering, AtomicUsize}}, future::Future};
+use std::future::Future;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 
-use bevy_app::{Plugin, App};
-use bevy_ecs::{system::Resource, prelude::World};
-use tokio::{runtime::Runtime, task::{JoinHandle}};
+use bevy_app::{App, Plugin, Update};
+use bevy_ecs::{prelude::World, system::Resource};
+
+use tokio::{runtime::Runtime, task::JoinHandle};
 
 /// An internal struct keeping track of how many ticks have elapsed since the start of the program.
 #[derive(Resource)]
@@ -14,7 +17,9 @@ struct UpdateTicks {
 impl UpdateTicks {
     fn increment_ticks(&self) -> usize {
         let new_ticks = self.ticks.fetch_add(1, Ordering::SeqCst).wrapping_add(1);
-        self.update_watch_tx.send(()).expect("Failed to send update_watch channel message");
+        self.update_watch_tx
+            .send(())
+            .expect("Failed to send update_watch channel message");
         new_ticks
     }
 }
@@ -36,7 +41,9 @@ impl Default for TokioTasksPlugin {
             make_runtime: Box::new(|| {
                 let mut runtime = tokio::runtime::Builder::new_multi_thread();
                 runtime.enable_all();
-                runtime.build().expect("Failed to create Tokio runtime for background tasks")
+                runtime
+                    .build()
+                    .expect("Failed to create Tokio runtime for background tasks")
             }),
         }
     }
@@ -51,12 +58,8 @@ impl Plugin for TokioTasksPlugin {
             ticks: ticks.clone(),
             update_watch_tx,
         });
-        app.insert_resource(TokioTasksRuntime::new(
-            ticks,
-            runtime,
-            update_watch_rx,
-        ));
-        app.add_system(tick_runtime_update);
+        app.insert_resource(TokioTasksRuntime::new(ticks, runtime, update_watch_rx));
+        app.add_systems(Update, tick_runtime_update);
         // app.add_system_to_stage(self.tick_stage.clone(), tick_runtime_update);
     }
 }
@@ -69,7 +72,7 @@ pub fn tick_runtime_update(world: &mut World) {
     let current_tick = {
         let tick_counter = match world.get_resource::<UpdateTicks>() {
             Some(counter) => counter,
-            None => return
+            None => return,
         };
 
         // Increment update ticks and notify watchers of update tick.
@@ -101,9 +104,10 @@ struct TokioTasksRuntimeInner {
 
 impl TokioTasksRuntime {
     fn new(
-            ticks: Arc<AtomicUsize>,
-            runtime: Runtime,
-            update_watch_rx: tokio::sync::watch::Receiver<()>) -> Self {
+        ticks: Arc<AtomicUsize>,
+        runtime: Runtime,
+        update_watch_rx: tokio::sync::watch::Receiver<()>,
+    ) -> Self {
         let (update_run_tx, update_run_rx) = tokio::sync::mpsc::unbounded_channel();
 
         Self(Box::new(TokioTasksRuntimeInner {
@@ -123,10 +127,13 @@ impl TokioTasksRuntime {
 
     /// Spawn a task which will run on the background Tokio [`Runtime`] managed by this [`TokioTasksRuntime`]. The
     /// background task is provided a [`TaskContext`] which allows it to do things like
-    /// [sleep for a given number of main thread updates](TaskContext::sleep_updates) or 
+    /// [sleep for a given number of main thread updates](TaskContext::sleep_updates) or
     /// [invoke callbacks on the main Bevy thread](TaskContext::run_on_main_thread).
-    pub fn spawn_background_task<Task, Output, Spawnable>(&self, spawnable_task: Spawnable) -> JoinHandle<Output>
-    where 
+    pub fn spawn_background_task<Task, Output, Spawnable>(
+        &self,
+        spawnable_task: Spawnable,
+    ) -> JoinHandle<Output>
+    where
         Task: Future<Output = Output> + Send + 'static,
         Output: Send + 'static,
         Spawnable: FnOnce(TaskContext) -> Task + Send + 'static,
@@ -146,7 +153,7 @@ impl TokioTasksRuntime {
         while let Ok(runnable) = self.0.update_run_rx.try_recv() {
             let context = MainThreadContext {
                 world,
-                current_tick
+                current_tick,
             };
             runnable(context);
         }
@@ -183,7 +190,10 @@ impl TaskContext {
     /// you instead want to sleep for a given length of wall-clock time, call the normal Tokio sleep
     /// function.
     pub async fn sleep_updates(&mut self, updates_to_sleep: usize) {
-        let target_tick = self.ticks.load(Ordering::SeqCst).wrapping_add(updates_to_sleep);
+        let target_tick = self
+            .ticks
+            .load(Ordering::SeqCst)
+            .wrapping_add(updates_to_sleep);
         while self.ticks.load(Ordering::SeqCst) < target_tick {
             if self.update_watch_rx.changed().await.is_err() {
                 return;
@@ -198,7 +208,7 @@ impl TaskContext {
     pub async fn run_on_main_thread<Runnable, Output>(&mut self, runnable: Runnable) -> Output
     where
         Runnable: FnOnce(MainThreadContext) -> Output + Send + 'static,
-        Output: Send + 'static
+        Output: Send + 'static,
     {
         let (output_tx, output_rx) = tokio::sync::oneshot::channel();
         if self.update_run_tx.send(Box::new(move |ctx| {
@@ -208,6 +218,8 @@ impl TaskContext {
         })).is_err() {
             panic!("Failed to send operation to be run on main thread");
         }
-        output_rx.await.expect("Failed to receive output from operation on main thread")
+        output_rx
+            .await
+            .expect("Failed to receive output from operation on main thread")
     }
 }
