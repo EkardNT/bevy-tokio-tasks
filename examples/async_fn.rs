@@ -4,6 +4,7 @@ use bevy::prelude::{
     App, Camera2dBundle, ClearColor, Color, Commands, DefaultPlugins, ResMut, Update,
 };
 
+use bevy_app::Startup;
 use bevy_tokio_tasks::{TaskContext, TokioTasksPlugin, TokioTasksRuntime};
 
 static COLORS: [Color; 5] = [
@@ -19,7 +20,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(TokioTasksPlugin::default())
         .add_systems(Update, bevy::window::close_on_esc)
-        .add_systems(Update, demo)
+        .add_systems(Startup, demo)
         .run();
 }
 

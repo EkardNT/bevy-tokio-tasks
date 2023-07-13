@@ -29,17 +29,22 @@ impl UpdateTicks {
 pub struct TokioTasksPlugin {
     /// Callback which is used to create a Tokio runtime when the plugin is installed. The
     /// default value for this field configures a multi-threaded [`Runtime`] with IO and timer
-    /// functionality enabled.
+    /// functionality enabled if building for non-wasm32 architectures. On wasm32 the current-thread
+    /// scheduler is used instead.
     pub make_runtime: Box<dyn Fn() -> Runtime + Send + Sync + 'static>,
 }
 
 impl Default for TokioTasksPlugin {
-    /// Configures the plugin to build a new multi-threaded Tokio [`Runtime`] with both
-    /// IO and timer functionality enabled.
+    /// Configures the plugin to build a new Tokio [`Runtime`] with both IO and timer functionality
+    /// enabled. On the wasm32 architecture, the [`Runtime`] will be the current-thread runtime, on all other
+    /// architectures the [`Runtime`] will be the multi-thread runtime.
     fn default() -> Self {
         Self {
             make_runtime: Box::new(|| {
+                #[cfg(not(target_arch = "wasm32"))]
                 let mut runtime = tokio::runtime::Builder::new_multi_thread();
+                #[cfg(target_arch = "wasm32")]
+                let mut runtime = tokio::runtime::Builder::new_current_thread();
                 runtime.enable_all();
                 runtime
                     .build()
@@ -60,7 +65,6 @@ impl Plugin for TokioTasksPlugin {
         });
         app.insert_resource(TokioTasksRuntime::new(ticks, runtime, update_watch_rx));
         app.add_systems(Update, tick_runtime_update);
-        // app.add_system_to_stage(self.tick_stage.clone(), tick_runtime_update);
     }
 }
 
@@ -150,6 +154,12 @@ impl TokioTasksRuntime {
 
     /// Execute all of the requested runnables on the main thread.
     pub(crate) fn execute_main_thread_work(&mut self, world: &mut World, current_tick: usize) {
+        // Running this single future which yields once allows the runtime to process tasks
+        // if the runtime is a current_thread runtime. If its a multi-thread runtime then
+        // this isn't necessary but is harmless.
+        self.0.runtime.block_on(async {
+            tokio::task::yield_now().await;
+        });
         while let Ok(runnable) = self.0.update_run_rx.try_recv() {
             let context = MainThreadContext {
                 world,

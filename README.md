@@ -15,7 +15,7 @@ settings (the plugin calls `Runtime::enable_all` to enable Tokio's IO and timing
 ```rust
 fn main() {
     bevy::App::new()
-        .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
+        .add_plugins(bevy_tokio_tasks::TokioTasksPlugin::default())
 }
 ```
 
@@ -24,7 +24,7 @@ If you want to customize the Tokio `Runtime` setup, you may do so by specifying 
 ```rust
 fn main() {
     bevy::App::new()
-        .add_plugin(bevy_tokio_tasks::TokioTasksPlugin {
+        .add_plugins(bevy_tokio_tasks::TokioTasksPlugin {
             make_runtime: Box::new(|| {
                 let mut runtime = tokio::runtime::Builder::new_multi_thread();
                 runtime.enable_all();

@@ -5,7 +5,7 @@ use bevy::prelude::{
 };
 
 use bevy_app::Startup;
-use bevy_tokio_tasks::{TokioTasksPlugin, TokioTasksRuntime};
+use bevy_tokio_tasks::TokioTasksRuntime;
 
 static COLORS: [Color; 5] = [
     Color::RED,
@@ -18,7 +18,14 @@ static COLORS: [Color; 5] = [
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(TokioTasksPlugin::default())
+        .add_plugins(bevy_tokio_tasks::TokioTasksPlugin {
+            make_runtime: Box::new(|| {
+                let mut runtime = tokio::runtime::Builder::new_current_thread();
+                runtime.enable_all();
+                runtime.build().unwrap()
+            }),
+            ..bevy_tokio_tasks::TokioTasksPlugin::default()
+        })
         .add_systems(Update, bevy::window::close_on_esc)
         .add_systems(Startup, demo)
         .run();
@@ -29,6 +36,7 @@ fn demo(runtime: ResMut<TokioTasksRuntime>, mut commands: Commands) {
     runtime.spawn_background_task(|mut ctx| async move {
         let mut color_index = 0;
         loop {
+            println!("Loop start");
             ctx.run_on_main_thread(move |ctx| {
                 if let Some(mut clear_color) = ctx.world.get_resource_mut::<ClearColor>() {
                     clear_color.0 = COLORS[color_index];
