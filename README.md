@@ -70,6 +70,9 @@ fn example_system(runtime: ResMut<TokioTasksRuntime>) {
 - [change_clear_color](examples/change_clear_color.rs) - This example spawns a background task which
 runs forever. Every second, the background task updates the app's background clear color. This demonstrates
 how background tasks can synchronize with the main thread to update game state.
+- [current_thread_runtime](examples/current_thread_runtime.rs) - This
+example demonstrates how you can customize the Tokio Runtime. It configures a
+current_thread Runtime instead of a multi-threading Runtime.
 - [async_fn](examples/async_fn.rs) - Does the same thing as the change_clear_color example,
 except that it shows how you can pass an `async fn` to `spawn_background_task`.
 - [shutdown_after_sleep](examples/shutdown_after_sleep.rs) - This example spawns a background task which
