@@ -1,7 +1,7 @@
 [package]
 name = "bevy-tokio-tasks"
 # Major and minor version here should match bevy's. Patch version can vary.
-version = "0.11.0"
+version = "0.12.0"
 edition = "2021"
 license = "CC0-1.0"
 description = "Simple integration of a Tokio runtime into a Bevy app for background processing."
@@ -11,13 +11,13 @@ keywords = ["gamedev", "bevy", "tokio", "async", "plugin"]
 categories = ["game-development", "asynchronous"]
 
 [dependencies]
-bevy_app = "0.11.0"
-bevy_ecs = "0.11.0"
+bevy_app = "0.12.0"
+bevy_ecs = "0.12.0"
 tokio = { version = "1", features = ["rt", "sync"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread"] }
 
 [dev-dependencies]
-bevy = { version = "0.11.0", default-features = false, features = ["bevy_core_pipeline", "bevy_asset", "bevy_render", "bevy_winit", "x11"] }
+bevy = { version = "0.12.0", default-features = false, features = ["bevy_core_pipeline", "bevy_asset", "bevy_render", "bevy_winit", "x11"] }
 tokio = { version = "1", features = ["time"] }

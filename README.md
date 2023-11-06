@@ -84,14 +84,15 @@ This crate's major and minor version numbers will match Bevy's. To allow this cr
 between Bevy updates, the patch version is allowed to increment independent of Bevy's release cycle.
 
 | bevy-tokio-tasks version | bevy version | tokio version |
-|---|---|---|
-| 0.11.0 | 0.11.0 | 1 |
-| 0.10.2 | 0.10.1 | 1 |
-| 0.10.1 | 0.10.0 | 1 |
-| 0.10.0 | 0.10.0 | 1 |
-| 0.9.5 | 0.9.1 | 1 |
-| 0.9.4 | 0.9.1 | 1 |
-| 0.9.3 | 0.9.1 | 1 |
-| 0.9.2 | 0.9.1 | 1 |
-| 0.9.1 | 0.9.1 | 1 |
-| 0.9.0 | 0.9.1 | 1 |
+|--------------------------|--------------|---|
+| 0.12.0                   | 0.12.0       | 1 |
+| 0.11.0                   | 0.11.0       | 1 |
+| 0.10.2                   | 0.10.1       | 1 |
+| 0.10.1                   | 0.10.0       | 1 |
+| 0.10.0                   | 0.10.0       | 1 |
+| 0.9.5                    | 0.9.1        | 1 |
+| 0.9.4                    | 0.9.1        | 1 |
+| 0.9.3                    | 0.9.1        | 1 |
+| 0.9.2                    | 0.9.1        | 1 |
+| 0.9.1                    | 0.9.1        | 1 |
+| 0.9.0                    | 0.9.1        | 1 |
