@@ -1,9 +1,7 @@
 use std::future::Future;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-
-use bevy_app::{App, Plugin, Update};
-use bevy_ecs::{prelude::World, system::Resource};
+use bevy::prelude::*;
 
 use tokio::{runtime::Runtime, task::JoinHandle};
 
@@ -42,9 +40,9 @@ impl Default for TokioTasksPlugin {
         Self {
             make_runtime: Box::new(|| {
                 #[cfg(not(target_arch = "wasm32"))]
-                let mut runtime = tokio::runtime::Builder::new_multi_thread();
+                    let mut runtime = tokio::runtime::Builder::new_multi_thread();
                 #[cfg(target_arch = "wasm32")]
-                let mut runtime = tokio::runtime::Builder::new_current_thread();
+                    let mut runtime = tokio::runtime::Builder::new_current_thread();
                 runtime.enable_all();
                 runtime
                     .build()
@@ -137,10 +135,10 @@ impl TokioTasksRuntime {
         &self,
         spawnable_task: Spawnable,
     ) -> JoinHandle<Output>
-    where
-        Task: Future<Output = Output> + Send + 'static,
-        Output: Send + 'static,
-        Spawnable: FnOnce(TaskContext) -> Task + Send + 'static,
+        where
+            Task: Future<Output = Output> + Send + 'static,
+            Output: Send + 'static,
+            Spawnable: FnOnce(TaskContext) -> Task + Send + 'static,
     {
         let inner = &self.0;
         let context = TaskContext {
@@ -216,9 +214,9 @@ impl TaskContext {
     /// report results back to the background thread by returning an output value, which will then be returned from
     /// this async function once the callback runs.
     pub async fn run_on_main_thread<Runnable, Output>(&mut self, runnable: Runnable) -> Output
-    where
-        Runnable: FnOnce(MainThreadContext) -> Output + Send + 'static,
-        Output: Send + 'static,
+        where
+            Runnable: FnOnce(MainThreadContext) -> Output + Send + 'static,
+            Output: Send + 'static,
     {
         let (output_tx, output_rx) = tokio::sync::oneshot::channel();
         if self.update_run_tx.send(Box::new(move |ctx| {
