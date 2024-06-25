@@ -19,7 +19,8 @@ fn main() {
 }
 ```
 
-If you want to customize the Tokio `Runtime` setup, you may do so by specifying a `make_runtime` callback on the `TokioTasksPlugin`.
+If you want to customize the Tokio `Runtime` setup, you may do so by specifying a `make_runtime` callback on
+the `TokioTasksPlugin`.
 
 ```rust
 fn main() {
@@ -68,15 +69,15 @@ fn example_system(runtime: ResMut<TokioTasksRuntime>) {
 ## Examples
 
 - [change_clear_color](examples/change_clear_color.rs) - This example spawns a background task which
-runs forever. Every second, the background task updates the app's background clear color. This demonstrates
-how background tasks can synchronize with the main thread to update game state.
+  runs forever. Every second, the background task updates the app's background clear color. This demonstrates
+  how background tasks can synchronize with the main thread to update game state.
 - [current_thread_runtime](examples/current_thread_runtime.rs) - This
-example demonstrates how you can customize the Tokio Runtime. It configures a
-current_thread Runtime instead of a multi-threading Runtime.
+  example demonstrates how you can customize the Tokio Runtime. It configures a
+  current_thread Runtime instead of a multi-threading Runtime.
 - [async_fn](examples/async_fn.rs) - Does the same thing as the change_clear_color example,
-except that it shows how you can pass an `async fn` to `spawn_background_task`.
+  except that it shows how you can pass an `async fn` to `spawn_background_task`.
 - [shutdown_after_sleep](examples/shutdown_after_sleep.rs) - This example spawns a background task which
-sleeps for 120 Bevy game updates, then shuts down the Bevy app.
+  sleeps for 120 Bevy game updates, then shuts down the Bevy app.
 
 ## Version Compatibility
 
@@ -84,14 +85,17 @@ This crate's major and minor version numbers will match Bevy's. To allow this cr
 between Bevy updates, the patch version is allowed to increment independent of Bevy's release cycle.
 
 | bevy-tokio-tasks version | bevy version | tokio version |
-|---|---|---|
-| 0.11.0 | 0.11.0 | 1 |
-| 0.10.2 | 0.10.1 | 1 |
-| 0.10.1 | 0.10.0 | 1 |
-| 0.10.0 | 0.10.0 | 1 |
-| 0.9.5 | 0.9.1 | 1 |
-| 0.9.4 | 0.9.1 | 1 |
-| 0.9.3 | 0.9.1 | 1 |
-| 0.9.2 | 0.9.1 | 1 |
-| 0.9.1 | 0.9.1 | 1 |
-| 0.9.0 | 0.9.1 | 1 |
+|--------------------------|--------------|---------------|
+| 0.14.0                   | 0.14.0       | 1             |
+| 0.13.0                   | 0.13.0       | 1             |
+| 0.12.0                   | 0.12.0       | 1             |
+| 0.11.0                   | 0.11.0       | 1             |
+| 0.10.2                   | 0.10.1       | 1             |
+| 0.10.1                   | 0.10.0       | 1             |
+| 0.10.0                   | 0.10.0       | 1             |
+| 0.9.5                    | 0.9.1        | 1             |
+| 0.9.4                    | 0.9.1        | 1             |
+| 0.9.3                    | 0.9.1        | 1             |
+| 0.9.2                    | 0.9.1        | 1             |
+| 0.9.1                    | 0.9.1        | 1             |
+| 0.9.0                    | 0.9.1        | 1             |
