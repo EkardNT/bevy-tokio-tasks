@@ -24,6 +24,6 @@ fn demo(runtime: ResMut<TokioTasksRuntime>) {
             );
             ctx.world.send_event(AppExit::Success);
         })
-            .await;
+        .await;
     });
 }
