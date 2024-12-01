@@ -30,7 +30,7 @@ fn main() {
 }
 
 fn demo(runtime: ResMut<TokioTasksRuntime>, mut commands: Commands) {
-    commands.spawn(Camera2d::default());
+    commands.spawn(Camera2d);
     runtime.spawn_background_task(|mut ctx| async move {
         let mut color_index = 0;
         loop {

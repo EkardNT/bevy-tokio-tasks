@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::color::Srgba;
-use bevy::prelude::{App, Camera2dBundle, ClearColor, Commands, DefaultPlugins, ResMut};
+use bevy::prelude::{App, Camera2d, ClearColor, Commands, DefaultPlugins, ResMut};
 use bevy_app::Startup;
 
 use bevy_tokio_tasks::{TaskContext, TokioTasksPlugin, TokioTasksRuntime};
@@ -23,7 +23,7 @@ fn main() {
 }
 
 fn demo(runtime: ResMut<TokioTasksRuntime>, mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
     runtime.spawn_background_task(update_colors);
 }
 
