@@ -7,6 +7,9 @@ use bevy_ecs::{prelude::World, system::Resource};
 
 use tokio::{runtime::Runtime, task::JoinHandle};
 
+/// A re-export of the tokio version used by this crate.
+pub use tokio;
+
 /// An internal struct keeping track of how many ticks have elapsed since the start of the program.
 #[derive(Resource)]
 struct UpdateTicks {
