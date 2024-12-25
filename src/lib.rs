@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use bevy_app::{App, Plugin, Update};
+use bevy_ecs::schedule::{InternedScheduleLabel, ScheduleLabel};
 use bevy_ecs::{prelude::World, system::Resource};
 
 use tokio::{runtime::Runtime, task::JoinHandle};
@@ -35,12 +36,17 @@ pub struct TokioTasksPlugin {
     /// functionality enabled if building for non-wasm32 architectures. On wasm32 the current-thread
     /// scheduler is used instead.
     pub make_runtime: Box<dyn Fn() -> Runtime + Send + Sync + 'static>,
+    /// The [`ScheduleLabel`] during which the [`tick_runtime_update`] function will be executed.
+    /// The default value for this field is [`Update`].
+    pub schedule_label: InternedScheduleLabel,
 }
 
 impl Default for TokioTasksPlugin {
     /// Configures the plugin to build a new Tokio [`Runtime`] with both IO and timer functionality
     /// enabled. On the wasm32 architecture, the [`Runtime`] will be the current-thread runtime, on all other
     /// architectures the [`Runtime`] will be the multi-thread runtime.
+    /// 
+    /// The default schedule label is [`Update`].
     fn default() -> Self {
         Self {
             make_runtime: Box::new(|| {
@@ -53,6 +59,7 @@ impl Default for TokioTasksPlugin {
                     .build()
                     .expect("Failed to create Tokio runtime for background tasks")
             }),
+            schedule_label: Update.intern()
         }
     }
 }
@@ -67,14 +74,14 @@ impl Plugin for TokioTasksPlugin {
             update_watch_tx,
         });
         app.insert_resource(TokioTasksRuntime::new(ticks, runtime, update_watch_rx));
-        app.add_systems(Update, tick_runtime_update);
+        app.add_systems(self.schedule_label, tick_runtime_update);
     }
 }
 
 /// The Bevy exclusive system which executes the main thread callbacks that background
 /// tasks requested using [`run_on_main_thread`](TaskContext::run_on_main_thread). You
-/// can control which [`CoreStage`] this system executes in by specifying a custom
-/// [`tick_stage`](TokioTasksPlugin::tick_stage) value.
+/// can control which Bevy schedule stage this system executes in by specifying a custom
+/// [`schedule_label`](TokioTasksPlugin::schedule_label) value.
 pub fn tick_runtime_update(world: &mut World) {
     let current_tick = {
         let tick_counter = match world.get_resource::<UpdateTicks>() {
