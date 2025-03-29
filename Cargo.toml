@@ -11,13 +11,13 @@ keywords = ["gamedev", "bevy", "tokio", "async", "plugin"]
 categories = ["game-development", "asynchronous"]
 
 [dependencies]
-bevy_app = "0.15.0"
-bevy_ecs = "0.15.0"
+bevy_app = "0.16.0-rc"
+bevy_ecs = "0.16.0-rc"
 tokio = { version = "1", features = ["rt", "sync"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread"] }
 
 [dev-dependencies]
-bevy = { version = "0.15.0", default-features = false, features = ["bevy_core_pipeline", "bevy_asset", "bevy_render", "bevy_winit", "bevy_window", "x11"] }
+bevy = { version = "0.16.0-rc", default-features = false, features = [ "std", "bevy_core_pipeline", "bevy_asset", "bevy_render", "bevy_winit", "bevy_window", "x11"] }
 tokio = { version = "1", features = ["time"] }
