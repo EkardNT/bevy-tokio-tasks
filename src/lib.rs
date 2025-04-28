@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use bevy_app::{App, Plugin, Update};
 use bevy_ecs::schedule::{InternedScheduleLabel, ScheduleLabel};
-use bevy_ecs::{prelude::World, system::Resource};
+use bevy_ecs::{prelude::World, resource::Resource};
 
 use tokio::{runtime::Runtime, task::JoinHandle};
 
