@@ -89,8 +89,8 @@ between Bevy updates, the patch version is allowed to increment independent of B
 | 0.16.0                   | 0.16.0       | 1             |
 | 0.15.0                   | 0.15.0       | 1             |
 | 0.14.0                   | 0.14.0       | 1             |
-| 0.13.0                   | 0.13.0       | 1             |
-| 0.12.0                   | 0.12.0       | 1             |
+| (not published)          | 0.13.0       | 1             |
+| (not published)          | 0.12.0       | 1             |
 | 0.11.0                   | 0.11.0       | 1             |
 | 0.10.2                   | 0.10.1       | 1             |
 | 0.10.1                   | 0.10.0       | 1             |
