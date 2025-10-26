@@ -26,7 +26,7 @@ fn demo(runtime: ResMut<TokioTasksRuntime>) {
                 "Task going to request app exit on tick {} in FixedUpdate",
                 ctx.current_tick
             );
-            ctx.world.send_event(AppExit::Success);
+            ctx.world.write_message(AppExit::Success);
         })
         .await;
     });
