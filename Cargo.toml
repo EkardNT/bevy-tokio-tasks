@@ -2,7 +2,7 @@
 name = "bevy-tokio-tasks"
 # Major and minor version here should match bevy's. Patch version can vary.
 version = "0.20.0"
-edition = "2021"
+edition = "2024"
 license = "CC0-1.0"
 description = "Simple integration of a Tokio runtime into a Bevy app for background processing."
 homepage = "https://crates.io/crates/bevy-tokio-tasks"
